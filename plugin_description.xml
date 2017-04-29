@@ -1,0 +1,10 @@
+<library path="lib/libobject_state_array_rviz_plugin_ros">
+  <class name="object_state_array_rviz_plugin_ros/ObjectStateArray"
+         type="object_state_array_rviz_plugin_ros::ObjectStateArrayDisplay"
+         base_class_type="rviz::Display">
+    <description>
+      Displays direction and scale of accelerations from automated_driving_msgs/ObjectStateArray messages.
+    </description>
+    <message_type>automated_driving_msgs/ObjectStateArray</message_type>
+  </class>
+</library>
