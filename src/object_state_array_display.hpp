@@ -1,118 +1,72 @@
-/*
- * Copyright (c) 2012, Willow Garage, Inc.
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the Willow Garage, Inc. nor the names of its
- *       contributors may be used to endorse or promote products derived from
- *       this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
+#pragma once
 
-#ifndef object_state_array_display_H
-#define object_state_array_display_H
-
-#ifndef Q_MOC_RUN
-#include <boost/circular_buffer.hpp>
-
+#include <memory>
 #include <automated_driving_msgs/ObjectStateArray.h>
 #include <rviz/message_filter_display.h>
-#endif
+#include <rviz/properties/bool_property.h>
+#include <rviz/properties/color_property.h>
+#include <rviz/properties/enum_property.h>
+#include <rviz/properties/float_property.h>
+#include <rviz/properties/property.h>
 
-namespace Ogre {
-class SceneNode;
-}
+#include "object_state_visual.hpp"
 
-namespace rviz {
-class ColorProperty;
-class FloatProperty;
-class IntProperty;
-class BoolProperty;
-}
-
-// All the source in this plugin is in its own namespace.  This is not
-// required but is good practice.
 namespace object_state_array_rviz_plugin_ros {
 
-class ObjectStateArrayVisual;
-
-// BEGIN_TUTORIAL
-// Here we declare our new subclass of rviz::Display.  Every display
-// which can be listed in the "Displays" panel is a subclass of
-// rviz::Display.
-//
-// MotionStateDisplay will show a 3D arrow showing the direction and magnitude
-// of the MotionState velocity vector.  The base of the arrow will be at
-// the frame listed in the header of the MotionState message, and the
-// direction of the arrow will be relative to the orientation of that
-// frame.  It will also optionally show a history of recent
-// velocity vectors, which will be stored in a circular buffer.
-//
-// The MotionStateDisplay class itself just implements the circular buffer,
-// editable parameters, and Display subclass machinery.  The visuals
-// themselves are represented by a separate class, MotionStateVisual.  The
-// idiom for the visuals is that when the objects exist, they appear
-// in the scene, and when they are deleted, they disappear.
 class ObjectStateArrayDisplay : public rviz::MessageFilterDisplay<automated_driving_msgs::ObjectStateArray> {
     Q_OBJECT
+
+    using Msg = automated_driving_msgs::ObjectStateArray;
+
 public:
-    // Constructor.  pluginlib::ClassLoader creates instances by calling
-    // the default constructor, so make sure you have one.
     ObjectStateArrayDisplay();
-    virtual ~ObjectStateArrayDisplay();
+    inline virtual ~ObjectStateArrayDisplay(){};
 
-    // Overrides of protected virtual functions from Display.  As much
-    // as possible, when Displays are not enabled, they should not be
-    // subscribed to incoming data and should not show anything in the
-    // 3D view.  These functions are where these connections are made
-    // and broken.
 protected:
-    virtual void onInitialize();
+    inline void reset() override {
+        MFDClass::reset();
+        visuals_.clear();
+        processMessage(msg_last_);
+    }
 
-    // A helper to clear this display back to the initial state.
-    virtual void reset();
+    inline virtual void onEnable() override {
+        MFDClass::onEnable();
+        processMessage(msg_last_);
+    }
 
-    // These Qt slots get connected to signals indicating changes in the user-editable properties.
+    inline virtual void updateTopic() override {
+        MFDClass::updateTopic();
+        processMessage(msg_last_);
+    }
+
 private Q_SLOTS:
-    void updateColorAndAlpha();
-    void updateNumberOfVehicle(int number_of_vehicles);
-    void showChildFrameId();
+    inline void update() {
+        processMessage(msg_last_);
+    }
+    void updateColoring();
+    void updateArrows();
 
-    // Function to handle an incoming ROS message.
+    void updp();
+
 private:
-    void processMessage(const automated_driving_msgs::ObjectStateArray::ConstPtr& msg);
+    void updateParameters();
+    void processMessage(const Msg::ConstPtr&) override;
 
-    // Storage for the list of visuals.  It is a circular buffer where
-    // data gets popped from the front (oldest) and pushed to the back (newest)
-    boost::circular_buffer<boost::shared_ptr<ObjectStateArrayVisual>> visuals_;
+    Ogre::ColourValue colorFromClassification(const automated_driving_msgs::ObjectClassification& classification);
 
-    // User-editable property variables.
-    rviz::ColorProperty* color_property_[4];
-    rviz::FloatProperty* alpha_property_;
-    rviz::IntProperty* history_length_property_;
-    rviz::BoolProperty* label_property_;
+    Msg::ConstPtr msg_last_ = nullptr; ///< The last message will be buffered
+
+    std::vector<ObjectStateVisual> visuals_; ///< Container for all object visuals
+    ObjectStateVisual::Parameters params_visual_;
+
+    // rviz properties
+    std::unique_ptr<rviz::Property> prop_visualization_;
+    std::unique_ptr<rviz::EnumProperty> prop_dropdown_visu_;
+    std::unique_ptr<rviz::BoolProperty> prop_show_arrows_, prop_text_show_, prop_text_debug_, prop_coloring_by_class_;
+    std::unique_ptr<rviz::FloatProperty> prop_coloring_alpha_, prop_arrow_v_min_, prop_arrow_v_max_, prop_arrow_length_,
+        prop_text_size_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_unknown_, prop_coloring_vehicle_, prop_coloring_pedestrian_,
+        prop_coloring_bike_;
 };
-// END_TUTORIAL
 
-} // end namespace object_state_array_rviz_plugin_ros
-
-#endif // object_state_array_display_H
-// %EndTag(FULL_SOURCE)%
+} // namespace object_state_array_rviz_plugin_ros

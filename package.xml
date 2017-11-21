@@ -1,11 +1,10 @@
 <package format="2">
   <name>object_state_array_rviz_plugin_ros</name>
-  <version>0.1.0</version>
+  <version>0.5.0</version>
   <description>ObjectStateArray plugin for RViz.</description>
 
   <license>contact-the-maintainer</license>
   <maintainer email="maximilian.naumann@kit.edu">Maximilian Naumann</maintainer>
-  <url type="repository">https://git.rwth-aachen.de/spp1835/object_state_array_rviz_plugin_ros.git</url>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>mrt_cmake_modules</build_depend>
@@ -18,8 +17,10 @@
   <depend>nodelet</depend>
 
   <build_depend>mrt_qt-dev</build_depend>
-  <depend>rviz</depend>
+
   <depend>automated_driving_msgs</depend>
+  <depend>simulation_utils</depend>
+  <depend>rviz</depend>
 
   <export>
       <rviz plugin="${prefix}/plugin_description.xml"/>

@@ -1,16 +1,14 @@
 # object_state_array_rviz_plugin_ros
 Rviz Plugin for ObjectStateArray messages.
- * visualizes messages of type automated_driving_msgs/ObjectStateArray: all objects' poses by a cube and their linear velocity by a vector
+* visualizes messages of type automated_driving_msgs/ObjectStateArray: all objects' poses by their mesh or a primitive and their linear velocity by a vector
 
 ## Installation
- * this package is part of the simulation framework
- * see simulation_management_ros_tool for installation and more details
+* add the package and its dependencies to your workspace
+* build it
+* source it
 
 ## Usage
-* started within the `simulation_management.launch` of the simulation_initialization_ros_tool
-
-## Credits
-* based on [rviz_plugin_tutorials](http://wiki.ros.org/rviz_plugin_tutorials) by Dave Hershberger, released under BSD license.
+* start rviz and add the plugin
 
 ## License
 Contact the maintainer.
