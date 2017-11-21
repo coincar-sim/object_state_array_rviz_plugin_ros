@@ -46,8 +46,11 @@ namespace object_state_array_rviz_plugin_ros {
 
 ObjectStateArrayDisplay::ObjectStateArrayDisplay() {
 
-    color_property_[0] = new rviz::ColorProperty(
-        "Velocity Arrows", QColor(204, 51, 204), "Color to draw the velocity arrows.", this, SLOT(updateColorAndAlpha()));
+    color_property_[0] = new rviz::ColorProperty("Velocity Arrows",
+                                                 QColor(204, 51, 204),
+                                                 "Color to draw the velocity arrows.",
+                                                 this,
+                                                 SLOT(updateColorAndAlpha()));
     alpha_property_ = new rviz::FloatProperty(
         "Alpha", 1.0, "0 is fully transparent, 1.0 is fully opaque.", this, SLOT(updateColorAndAlpha()));
     label_property_ = new rviz::BoolProperty(

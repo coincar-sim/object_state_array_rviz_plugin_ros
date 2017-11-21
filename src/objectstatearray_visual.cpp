@@ -78,8 +78,8 @@ ObjectStateArrayVisual::ObjectStateArrayVisual(Ogre::SceneManager* scene_manager
     Ogre::Vector3 arrowPosition(0, 0, lowerCubeScale.z / 2.0);
     velocity_arrow_->setPosition(arrowPosition);
 
-    float lengthCenterToAxisX = 1.4/wheelScale.x;
-    float lengthCenterToWheelY = lowerCubeScale.y/2.0/wheelScale.y;
+    float lengthCenterToAxisX = 1.4 / wheelScale.x;
+    float lengthCenterToWheelY = lowerCubeScale.y / 2.0 / wheelScale.y;
 
     wheel_fr_.reset(new rviz::Shape(rviz::Shape::Cylinder, scene_manager_, frame_node_));
     wheel_fr_->setPosition(wheelPosition);
