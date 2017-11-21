@@ -39,8 +39,8 @@
 #include <rviz/properties/float_property.h>
 #include <rviz/properties/int_property.h>
 
-#include "objectstatearray_display.hpp"
-#include "objectstatearray_visual.hpp"
+#include "object_state_array_display.hpp"
+#include "object_state_visual.hpp"
 
 namespace object_state_array_rviz_plugin_ros {
 

@@ -35,7 +35,7 @@
 #include <rviz/ogre_helpers/movable_text.h>
 #include <rviz/ogre_helpers/shape.h>
 
-#include "objectstatearray_visual.hpp"
+#include "object_state_array_visual.hpp"
 
 namespace object_state_array_rviz_plugin_ros {
 

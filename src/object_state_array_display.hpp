@@ -27,8 +27,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OBJECTSTATEARRAY_DISPLAY_H
-#define OBJECTSTATEARRAY_DISPLAY_H
+#ifndef object_state_array_display_H
+#define object_state_array_display_H
 
 #ifndef Q_MOC_RUN
 #include <boost/circular_buffer.hpp>
@@ -114,5 +114,5 @@ private:
 
 } // end namespace object_state_array_rviz_plugin_ros
 
-#endif // OBJECTSTATEARRAY_DISPLAY_H
+#endif // object_state_array_display_H
 // %EndTag(FULL_SOURCE)%

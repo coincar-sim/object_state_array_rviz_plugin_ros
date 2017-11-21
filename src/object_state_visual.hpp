@@ -27,8 +27,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OBJECTSTATEARRAY_VISUAL_H
-#define OBJECTSTATEARRAY_VISUAL_H
+#ifndef object_state_visual_H
+#define object_state_visual_H
 
 #include <automated_driving_msgs/ObjectStateArray.h>
 
@@ -102,4 +102,4 @@ private:
 
 } // end namespace object_state_array_rviz_plugin_ros
 
-#endif // OBJECTSTATEARRAY_VISUAL_H
+#endif // object_state_visual_H
