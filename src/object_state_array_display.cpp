@@ -70,12 +70,46 @@ ObjectStateArrayDisplay::ObjectStateArrayDisplay() {
                                                                    prop_visualization_.get(),
                                                                    SLOT(update()),
                                                                    this);
-    prop_coloring_vehicle_ = std::make_unique<rviz::ColorProperty>(
-        "Vehicles", QColor(255, 0, 0), "Vehicle coloring.", prop_visualization_.get(), SLOT(update()), this);
-    prop_coloring_pedestrian_ = std::make_unique<rviz::ColorProperty>(
-        "Pedestrians", QColor(0, 255, 0), "Pedestrian coloring.", prop_visualization_.get(), SLOT(update()), this);
-    prop_coloring_bike_ = std::make_unique<rviz::ColorProperty>(
-        "Bikes", QColor(0, 0, 255), "Bike coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_road_ = std::make_unique<rviz::ColorProperty>(
+        "Road", QColor(128, 64, 128), "Road coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_sidewalk_ = std::make_unique<rviz::ColorProperty>(
+        "Sidewalks", QColor(244, 35, 232), "Sidewalk coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_building_ = std::make_unique<rviz::ColorProperty>(
+        "Buildings", QColor(70, 70, 70), "Building coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_wall_ = std::make_unique<rviz::ColorProperty>(
+        "Wall", QColor(102, 102, 156), "Wall coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_fence_ = std::make_unique<rviz::ColorProperty>(
+        "Fence", QColor(190, 153, 153), "Fence coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_pole_ = std::make_unique<rviz::ColorProperty>(
+        "Pole", QColor(153, 153, 153), "Pole coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_traffic_light_ = std::make_unique<rviz::ColorProperty>(
+        "TrafficLight", QColor(250, 170, 30), "TrafficLight coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_traffic_sign_ = std::make_unique<rviz::ColorProperty>(
+        "TrafficSign", QColor(220, 220, 0), "TrafficSign coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_vegetation_ = std::make_unique<rviz::ColorProperty>(
+        "Vegetation", QColor(107, 142, 35), "Vegetation coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_terrain_ = std::make_unique<rviz::ColorProperty>(
+        "Terrain", QColor(152, 251, 152), "Terrain coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_sky_ = std::make_unique<rviz::ColorProperty>(
+        "Sky", QColor(70, 130, 180), "Sky coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_person_ = std::make_unique<rviz::ColorProperty>(
+        "Person", QColor(220, 20, 60), "Person coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_rider_ = std::make_unique<rviz::ColorProperty>(
+        "Rider", QColor(255, 0, 0), "Rider coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_car_ = std::make_unique<rviz::ColorProperty>(
+        "Car", QColor(0, 0, 142), "Car coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_truck_ = std::make_unique<rviz::ColorProperty>(
+        "Truck", QColor(0, 0, 70), "Truck coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_bus_ = std::make_unique<rviz::ColorProperty>(
+        "Bus", QColor(0, 60, 100), "Bus coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_train_ = std::make_unique<rviz::ColorProperty>(
+        "Train", QColor(0, 80, 100), "Train coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_motor_cycle_ = std::make_unique<rviz::ColorProperty>(
+        "MotorCycle", QColor(0, 0, 230), "MotorCycle coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_bicycle_ = std::make_unique<rviz::ColorProperty>(
+        "Bicycle", QColor(119, 11, 32), "Bicycle coloring.", prop_visualization_.get(), SLOT(update()), this);
+    prop_coloring_unknown_ = std::make_unique<rviz::ColorProperty>(
+        "Unknown", QColor(128, 128, 128), "Unknown coloring.", prop_visualization_.get(), SLOT(update()), this);
 
     /**
      * Arrows
@@ -129,9 +163,26 @@ void ObjectStateArrayDisplay::updateDropdown() {
 }
 
 void ObjectStateArrayDisplay::updateColoring() {
-    prop_coloring_vehicle_->setHidden(!prop_coloring_by_class_->getBool());
-    prop_coloring_pedestrian_->setHidden(!prop_coloring_by_class_->getBool());
-    prop_coloring_bike_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_road_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_sidewalk_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_building_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_wall_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_fence_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_pole_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_traffic_light_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_traffic_sign_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_vegetation_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_terrain_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_sky_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_person_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_rider_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_car_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_truck_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_bus_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_train_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_motor_cycle_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_bicycle_->setHidden(!prop_coloring_by_class_->getBool());
+    prop_coloring_unknown_->setHidden(!prop_coloring_by_class_->getBool());
     processMessage(msg_last_);
 }
 
@@ -163,21 +214,67 @@ Ogre::ColourValue ObjectStateArrayDisplay::colorFromClassification(
 
     Ogre::ColourValue color;
 
-    if (!prop_coloring_by_class_->getBool() || classification.classes_with_probabilities.empty()) {
+    if (!prop_coloring_by_class_->getBool() || classification.semantic_classes_with_probabilities.empty()) {
         color = prop_coloring_unknown_->getOgreColor();
     } else {
-        switch (classification.classes_with_probabilities.front().classification) {
+        switch (classification.semantic_classes_with_probabilities.front().classification) {
 
+        case automated_driving_msgs::ObjectClassification::ROAD:
+            color = prop_coloring_road_->getOgreColor();
+            break;
+        case automated_driving_msgs::ObjectClassification::SIDEWALK:
+            color = prop_coloring_sidewalk_->getOgreColor();
+            break;
+        case automated_driving_msgs::ObjectClassification::BUILDING:
+            color = prop_coloring_building_->getOgreColor();
+            break;
+        case automated_driving_msgs::ObjectClassification::WALL:
+            color = prop_coloring_wall_->getOgreColor();
+            break;
+        case automated_driving_msgs::ObjectClassification::FENCE:
+            color = prop_coloring_fence_->getOgreColor();
+            break;
+        case automated_driving_msgs::ObjectClassification::POLE:
+            color = prop_coloring_pole_->getOgreColor();
+            break;
+        case automated_driving_msgs::ObjectClassification::TRAFFICLIGHT:
+            color = prop_coloring_traffic_light_->getOgreColor();
+            break;
+        case automated_driving_msgs::ObjectClassification::TRAFFICSIGN:
+            color = prop_coloring_traffic_sign_->getOgreColor();
+            break;
+        case automated_driving_msgs::ObjectClassification::VEGETATION:
+            color = prop_coloring_vegetation_->getOgreColor();
+            break;
+        case automated_driving_msgs::ObjectClassification::TERRAIN:
+            color = prop_coloring_terrain_->getOgreColor();
+            break;
+        case automated_driving_msgs::ObjectClassification::SKY:
+            color = prop_coloring_sky_->getOgreColor();
+            break;
+        case automated_driving_msgs::ObjectClassification::PERSON:
+            color = prop_coloring_person_->getOgreColor();
+            break;
+        case automated_driving_msgs::ObjectClassification::RIDER:
+            color = prop_coloring_rider_->getOgreColor();
+            break;
         case automated_driving_msgs::ObjectClassification::CAR:
-            color = prop_coloring_vehicle_->getOgreColor();
+            color = prop_coloring_car_->getOgreColor();
             break;
-
-        case automated_driving_msgs::ObjectClassification::PEDESTRIAN:
-            color = prop_coloring_pedestrian_->getOgreColor();
+        case automated_driving_msgs::ObjectClassification::TRUCK:
+            color = prop_coloring_truck_->getOgreColor();
             break;
-
+        case automated_driving_msgs::ObjectClassification::BUS:
+            color = prop_coloring_bus_->getOgreColor();
+            break;
+        case automated_driving_msgs::ObjectClassification::TRAIN:
+            color = prop_coloring_train_->getOgreColor();
+            break;
+        case automated_driving_msgs::ObjectClassification::MOTORCYCLE:
+            color = prop_coloring_motor_cycle_->getOgreColor();
+            break;
         case automated_driving_msgs::ObjectClassification::BICYCLE:
-            color = prop_coloring_bike_->getOgreColor();
+            color = prop_coloring_bicycle_->getOgreColor();
             break;
 
         default:

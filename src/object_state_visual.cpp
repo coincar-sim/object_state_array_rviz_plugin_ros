@@ -54,16 +54,16 @@ ObjectStateVisual::ObjectStateVisual(Ogre::SceneManager* sm, Ogre::SceneNode* sn
 
 
 void ObjectStateVisual::makePrimitive(Ogre::SceneNode* sn) {
-    if (obj_.classification.classes_with_probabilities.empty()) {
+    if (obj_.classification.semantic_classes_with_probabilities.empty()) {
         primitive_shape_ = std::make_shared<rviz::SimpleUnknown>(scene_manager_, sn);
     } else {
-        switch (obj_.classification.classes_with_probabilities.front().classification) {
+        switch (obj_.classification.semantic_classes_with_probabilities.front().classification) {
 
         case automated_driving_msgs::ObjectClassification::CAR:
             primitive_shape_ = std::make_shared<rviz::SimpleCar>(scene_manager_, sn);
             break;
 
-        case automated_driving_msgs::ObjectClassification::PEDESTRIAN:
+        case automated_driving_msgs::ObjectClassification::PERSON:
             primitive_shape_ = std::make_shared<rviz::SimplePedestrian>(scene_manager_, sn);
             break;
 

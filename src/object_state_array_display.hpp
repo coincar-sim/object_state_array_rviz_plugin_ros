@@ -99,8 +99,26 @@ private:
     std::unique_ptr<rviz::BoolProperty> prop_show_arrows_, prop_text_show_, prop_text_debug_, prop_coloring_by_class_;
     std::unique_ptr<rviz::FloatProperty> prop_coloring_alpha_, prop_arrow_v_min_, prop_arrow_v_max_, prop_arrow_length_,
         prop_text_size_;
-    std::unique_ptr<rviz::ColorProperty> prop_coloring_unknown_, prop_coloring_vehicle_, prop_coloring_pedestrian_,
-        prop_coloring_bike_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_road_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_sidewalk_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_building_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_wall_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_fence_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_pole_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_traffic_light_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_traffic_sign_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_vegetation_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_terrain_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_sky_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_person_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_rider_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_car_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_truck_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_bus_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_train_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_motor_cycle_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_bicycle_;
+    std::unique_ptr<rviz::ColorProperty> prop_coloring_unknown_;
 };
 
 } // namespace object_state_array_rviz_plugin_ros
