@@ -1,4 +1,4 @@
-#pkg_version=2.0
+set(MRT_PKG_VERSION 2.2)
 # Modify only if you know what you are doing!
 cmake_minimum_required(VERSION 2.8.12)
 project(object_state_array_rviz_plugin_ros)
@@ -18,9 +18,11 @@ find_package(AutoDeps REQUIRED COMPONENTS ${DEPENDEND_PACKAGES})
 # Manually resolve removed dependend packages
 #find_package(...)
 
-# Set some variable in order to process Qt compiler commands like "Q_OBJECT" in the header files
-set(CMAKE_AUTOMOC ON)
-add_definitions(-fPIC)
+# Mark files or folders for display in IDEs
+mrt_add_to_ide(README.md .gitlab-ci.yml)
+
+# Remove a warning caused by the rviz-plugin core
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-expansion-to-defined")
 
 ########################
 ## add python modules ##
@@ -36,16 +38,41 @@ if (PROJECT_PYTHON_SOURCE_FILES_SRC)
         )
 endif()
 
+################################################
+## Declare ROS messages, services and actions ##
+################################################
+
+# Add message, service and action files
+glob_ros_files(add_message_files msg)
+glob_ros_files(add_service_files srv)
+glob_ros_files(add_action_files action)
+
+# Generate added messages and services with any dependencies listed here
+if (ROS_GENERATE_MESSAGES)
+    generate_messages(
+        DEPENDENCIES
+        #add dependencies here
+        #std_msgs
+        )
+endif()
+
+# Generate dynamic reconfigure options
+file(GLOB PARAMS_FILES RELATIVE "${CMAKE_CURRENT_LIST_DIR}" "cfg/*.params" "cfg/*.cfg" "cfg/*.mrtcfg" "cfg/*.rosif")
+if (PARAMS_FILES)
+    generate_ros_parameter_files(${PARAMS_FILES})
+    generate_ros_interface_files(${PARAMS_FILES})
+endif ()
+
 ############################
 ## read source code files ##
 ############################
+file(GLOB_RECURSE PROJECT_HEADER_FILES_INC RELATIVE "${CMAKE_CURRENT_LIST_DIR}" "include/*.h" "include/*.hpp")
 file(GLOB PROJECT_SOURCE_FILES_INC RELATIVE "${CMAKE_CURRENT_LIST_DIR}" "src/*.h" "src/*.hpp")
 file(GLOB PROJECT_SOURCE_FILES_SRC RELATIVE "${CMAKE_CURRENT_LIST_DIR}" "src/*.cpp")
 
 if (PROJECT_SOURCE_FILES_SRC)
     set(LIBRARY_NAME ${PROJECT_NAME})
 endif()
-
 
 ###################################
 ## catkin specific configuration ##
@@ -67,7 +94,7 @@ catkin_package(
 ###########
 # Add include and library directories
 include_directories(
-    include/${LIBRARY_NAME}
+    include/${PROJECT_NAME}
     ${mrt_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
     )
@@ -78,7 +105,7 @@ link_directories(
 
 # Declare a cpp library
 mrt_add_library(${PROJECT_NAME}
-    INCLUDES ${PROJECT_HEADER_FILES_INC} ${PROJECT_SOURCE_FILES_INC}
+    INCLUDES ${PROJECT_HEADER_FILES_INC} ${PROJECT_SOURCE_FILES_INC} 
     SOURCES ${PROJECT_SOURCE_FILES_SRC}
     )
 
@@ -93,6 +120,7 @@ mrt_install(PROGRAMS scripts FILES launch rviz maps res data nodelet_plugins.xml
 #############
 # Add test targets for cpp and python tests
 if (CATKIN_ENABLE_TESTING)
+    mrt_add_ros_tests(test)
     mrt_add_tests(test)
-    catkin_add_nosetests(test DEPENDENCIES ${${PROJECT_NAME}_EXPORTED_TARGETS})
+    mrt_add_nosetests(test)
 endif()

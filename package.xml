@@ -1,9 +1,9 @@
 <package format="2">
   <name>object_state_array_rviz_plugin_ros</name>
-  <version>0.5.0</version>
+  <version>1.0.0</version>
   <description>ObjectStateArray plugin for RViz.</description>
 
-  <license>contact-the-maintainer</license>
+  <license>BSD</license>
   <maintainer email="maximilian.naumann@kit.edu">Maximilian Naumann</maintainer>
 
   <buildtool_depend>catkin</buildtool_depend>
@@ -19,7 +19,8 @@
   <build_depend>mrt_qt-dev</build_depend>
 
   <depend>automated_driving_msgs</depend>
-  <depend>simulation_utils</depend>
+  <depend>util_automated_driving_msgs</depend>
+  <depend>util_rviz</depend>
   <depend>rviz</depend>
 
   <export>

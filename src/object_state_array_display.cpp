@@ -1,3 +1,33 @@
+/*
+ * Copyright (c) 2017
+ * FZI Forschungszentrum Informatik, Karlsruhe, Germany (www.fzi.de)
+ * KIT, Institute of Measurement and Control, Karlsruhe, Germany (www.mrt.kit.edu)
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 3. Neither the name of the copyright holder nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software without
+ *    specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "object_state_array_display.hpp"
 
 
@@ -14,7 +44,7 @@ ObjectStateArrayDisplay::ObjectStateArrayDisplay() {
                                                                "Meshes",
                                                                "Whether to show the mesh or an object primitive.",
                                                                prop_visualization_.get(),
-                                                               SLOT(updp()),
+                                                               SLOT(update()),
                                                                this);
     prop_dropdown_visu_->addOption("Primitives", 1);
     prop_dropdown_visu_->addOption("Meshes", 2);
@@ -31,11 +61,11 @@ ObjectStateArrayDisplay::ObjectStateArrayDisplay() {
                                                                    this);
 
     prop_coloring_alpha_ = std::make_unique<rviz::FloatProperty>(
-        "Alpha", 0.3, "0 is transparent, 1 is opaque.", prop_visualization_.get(), SLOT(update()), this);
+        "Alpha", 1.0, "0 is transparent, 1 is opaque.", prop_visualization_.get(), SLOT(update()), this);
     prop_coloring_alpha_->setMin(0.0);
     prop_coloring_alpha_->setMax(1.0);
     prop_coloring_unknown_ = std::make_unique<rviz::ColorProperty>("Unknown",
-                                                                   QColor(255, 255, 255),
+                                                                   QColor(100, 100, 100),
                                                                    "Color to draw all objects of unknown class.",
                                                                    prop_visualization_.get(),
                                                                    SLOT(update()),
@@ -61,13 +91,13 @@ ObjectStateArrayDisplay::ObjectStateArrayDisplay() {
                                               this);
     prop_arrow_v_max_ = std::make_unique<rviz::FloatProperty>(
         "Maximum velocity",
-        10,
+        30,
         "The velocity in m/s at which the arrow has maximum length and is clipped afterwards.",
         prop_show_arrows_.get(),
         SLOT(update()),
         this);
     prop_arrow_length_ = std::make_unique<rviz::FloatProperty>(
-        "Length", 3, "The maximum arrow length in meters.", prop_show_arrows_.get(), SLOT(update()), this);
+        "Length", 10, "The maximum arrow length in meters.", prop_show_arrows_.get(), SLOT(update()), this);
 
     /**
      * Text
@@ -80,7 +110,7 @@ ObjectStateArrayDisplay::ObjectStateArrayDisplay() {
         "Debug info", false, "Whether to show debug info for objects.", prop_text_show_.get(), SLOT(update()), this);
 }
 
-void ObjectStateArrayDisplay::updp() {
+void ObjectStateArrayDisplay::updateDropdown() {
     switch (prop_dropdown_visu_->getOptionInt()) {
     case 1: ///< primitives
         params_visual_.make_mesh = false;
@@ -102,6 +132,7 @@ void ObjectStateArrayDisplay::updateColoring() {
     prop_coloring_vehicle_->setHidden(!prop_coloring_by_class_->getBool());
     prop_coloring_pedestrian_->setHidden(!prop_coloring_by_class_->getBool());
     prop_coloring_bike_->setHidden(!prop_coloring_by_class_->getBool());
+    processMessage(msg_last_);
 }
 
 void ObjectStateArrayDisplay::updateArrows() {
@@ -122,6 +153,8 @@ void ObjectStateArrayDisplay::updateParameters() {
     params_visual_.text_debug = prop_text_debug_->getBool();
     params_visual_.text_font_size = prop_text_size_->getFloat();
     params_visual_.text_v_min = params_visual_.arrow_v_min;
+
+    updateDropdown();
 }
 
 

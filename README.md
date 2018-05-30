@@ -10,5 +10,8 @@ Rviz Plugin for ObjectStateArray messages.
 ## Usage
 * start rviz and add the plugin
 
+## Contributors
+Pascal Böhmler, Viktoria Braun, Jan-Philipp Kaiser, Maximilian Naumann, Beija Nigl
+
 ## License
-Contact the maintainer.
+This package is distributed under the 3-Clause BSD License, see [LICENSE](LICENSE).
