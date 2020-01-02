@@ -34,6 +34,7 @@
 #include <automated_driving_msgs/ObjectStateArray.h>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-but-set-parameter"
+#pragma GCC diagnostic ignored "-Wregister"
 #include <rviz/message_filter_display.h>
 #pragma GCC diagnostic pop
 #include <rviz/properties/bool_property.h>
