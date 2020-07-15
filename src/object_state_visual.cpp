@@ -86,7 +86,7 @@ void ObjectStateVisual::makeMesh(Ogre::SceneNode* sn) {
 
     mesh_shape_->estimateVertexCount(obj_.hull.vertices.size());
     for (auto& v : obj_.hull.vertices)
-        mesh_shape_->addVertex(rviz::pointMsgToOgre(v));
+        mesh_shape_->addVertex(rviz::pointMsgToOgre(v), Ogre::Vector3(0,0,-1), params_.color);
     for (auto& t : obj_.hull.triangles)
         mesh_shape_->addTriangle(t.vertex_indices[0], t.vertex_indices[1], t.vertex_indices[2]);
     mesh_shape_->endTriangles();
