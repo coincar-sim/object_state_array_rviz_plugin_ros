@@ -16,7 +16,7 @@
   <depend>roslib</depend>
   <depend>nodelet</depend>
 
-  <build_depend>mrt_qt-dev</build_depend>
+  <build_depend>qtbase5-dev</build_depend>
 
   <depend>automated_driving_msgs</depend>
   <depend>util_automated_driving_msgs</depend>
