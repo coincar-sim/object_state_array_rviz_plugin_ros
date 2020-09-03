@@ -43,18 +43,31 @@
 #include <rviz/ogre_helpers/arrow.h>
 #include <rviz/ogre_helpers/mesh_shape.h>
 #include <rviz/ogre_helpers/movable_text.h>
+#include <rviz/ogre_helpers/point_cloud.h>
+#include <rviz/properties/status_property.h>
 #endif
 
 namespace object_state_array_rviz_plugin_ros {
 
 struct ObjectStateVisual {
 
-    struct Parameters {
-        bool make_arrow{true};
-        bool make_mesh{false};
-        bool make_text{true};
-        bool make_primitive{true};
+    struct Status {
+        using Level = rviz::StatusProperty::Level;
 
+        inline Status(const unsigned id) : message{"| Id " + std::to_string(id) + ": "} {
+        }
+
+        Level level{Level::Ok};
+        std::string message;
+    };
+
+    struct Parameters {
+
+        enum class VisualizationMode { primitive = 0, mesh = 1, point_cloud = 2 };
+
+        VisualizationMode visualization_mode{VisualizationMode::mesh};
+        bool make_arrow{true};
+        bool make_text{true};
 
         Ogre::ColourValue color{Ogre::ColourValue::Black};
 
@@ -65,18 +78,26 @@ struct ObjectStateVisual {
         float text_font_size{1};
         float text_v_min{1};
         bool text_debug{false};
+
+        float point_cloud_point_size{0.05f};
     };
 
     using Msg = automated_driving_msgs::ObjectState;
 
     ObjectStateVisual(Ogre::SceneManager*, Ogre::SceneNode*, const Msg&, const Parameters&);
+
     virtual inline ~ObjectStateVisual() {
         scene_manager_->destroySceneNode(scene_node_);
+    }
+
+    inline const Status& getStatus() const {
+        return status_;
     }
 
 private:
     void makeArrow(Ogre::SceneNode*);
     void makeMesh(Ogre::SceneNode*);
+    void makePointCloud(Ogre::SceneNode*);
     void makeText(Ogre::SceneNode*);
     void makePrimitive(Ogre::SceneNode*);
 
@@ -87,9 +108,11 @@ private:
     std::shared_ptr<rviz::Arrow> arrow_;                ///< Velocity arrow
     std::shared_ptr<rviz::MovableText> movable_text_;   ///< Info text
     std::shared_ptr<rviz::MultiShape> primitive_shape_; ///< Object primitive
+    std::shared_ptr<rviz::PointCloud> point_cloud_;     ///< Point cloud
 
     Msg obj_;
     Parameters params_;
+    Status status_;
 };
 
 } // namespace object_state_array_rviz_plugin_ros

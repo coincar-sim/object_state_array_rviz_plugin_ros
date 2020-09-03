@@ -41,8 +41,10 @@
 #include <rviz/properties/color_property.h>
 #include <rviz/properties/enum_property.h>
 #include <rviz/properties/float_property.h>
+#include <rviz/properties/int_property.h>
 #include <rviz/properties/property.h>
 
+#include "object_prediction_visual.hpp"
 #include "object_state_visual.hpp"
 
 namespace object_state_array_rviz_plugin_ros {
@@ -91,16 +93,21 @@ private:
     Msg::ConstPtr msg_last_ = nullptr; ///< The last message will be buffered
 
     std::vector<ObjectStateVisual> visuals_; ///< Container for all object visuals
+    std::vector<ObjectPredictionVisual> visuals_prediction_; ///< Container for all object prediction visuals
     ObjectStateVisual::Parameters params_visual_;
+    ObjectPredictionVisual::Parameters params_visual_prediction_;
 
     // rviz properties
-    std::unique_ptr<rviz::Property> prop_visualization_;
+    std::unique_ptr<rviz::Property> prop_visualization_, prop_point_cloud_;
     std::unique_ptr<rviz::EnumProperty> prop_dropdown_visu_;
-    std::unique_ptr<rviz::BoolProperty> prop_show_arrows_, prop_text_show_, prop_text_debug_, prop_coloring_by_class_;
+    std::unique_ptr<rviz::BoolProperty> prop_show_arrows_, prop_text_show_, prop_text_debug_, prop_coloring_by_class_,
+        prop_prediction_, prop_prediction_centerline_, prop_prediction_corridor_;
     std::unique_ptr<rviz::FloatProperty> prop_coloring_alpha_, prop_arrow_v_min_, prop_arrow_v_max_, prop_arrow_length_,
-        prop_text_size_;
+        prop_text_size_, prop_point_cloud_point_size_, prop_prediction_point_cloud_point_size_,
+        prop_prediction_billboard_width_, prop_prediction_horizon_;
     std::unique_ptr<rviz::ColorProperty> prop_coloring_unknown_, prop_coloring_vehicle_, prop_coloring_pedestrian_,
-        prop_coloring_bike_;
+        prop_coloring_bike_, prop_prediction_color_;
+    std::unique_ptr<rviz::IntProperty> prop_prediction_number_traj_;
 };
 
 } // namespace object_state_array_rviz_plugin_ros

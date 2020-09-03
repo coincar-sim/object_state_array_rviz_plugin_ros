@@ -30,7 +30,6 @@
 
 #include "object_state_array_display.hpp"
 
-
 namespace object_state_array_rviz_plugin_ros {
 
 ObjectStateArrayDisplay::ObjectStateArrayDisplay() {
@@ -40,15 +39,15 @@ ObjectStateArrayDisplay::ObjectStateArrayDisplay() {
      */
     prop_visualization_ =
         std::make_unique<rviz::Property>("Visualization", QVariant(), "Object display options.", this);
-    prop_dropdown_visu_ = std::make_unique<rviz::EnumProperty>("Meshes/Primitives",
+    prop_dropdown_visu_ = std::make_unique<rviz::EnumProperty>("Method",
                                                                "Meshes",
-                                                               "Whether to show the mesh or an object primitive.",
+                                                               "Whether to show mesh, primitives or raw points",
                                                                prop_visualization_.get(),
                                                                SLOT(update()),
                                                                this);
-    prop_dropdown_visu_->addOption("Primitives", 1);
-    prop_dropdown_visu_->addOption("Meshes", 2);
-
+    prop_dropdown_visu_->addOption("Primitives", 0);
+    prop_dropdown_visu_->addOption("Meshes", 1);
+    prop_dropdown_visu_->addOption("Point Cloud", 2);
 
     /**
      * Coloring
@@ -108,24 +107,51 @@ ObjectStateArrayDisplay::ObjectStateArrayDisplay() {
         "Size", 0.4, "The text size.", prop_text_show_.get(), SLOT(update()), this);
     prop_text_debug_ = std::make_unique<rviz::BoolProperty>(
         "Debug info", false, "Whether to show debug info for objects.", prop_text_show_.get(), SLOT(update()), this);
+
+    /**
+     * Point cloud
+     */
+    prop_point_cloud_ = std::make_unique<rviz::Property>(
+        "Point Cloud", QVariant(), "Point cloud visualization options.", prop_visualization_.get());
+    prop_point_cloud_point_size_ = std::make_unique<rviz::FloatProperty>(
+        "Point size", 0.05, "Point size", prop_point_cloud_.get(), SLOT(update()), this);
+
+    /**
+     * Prediction
+     */
+    prop_prediction_ = std::make_unique<rviz::BoolProperty>(
+        "Prediction", false, "Whether to display prediction or not.", this, SLOT(update()));
+    prop_prediction_centerline_ = std::make_unique<rviz::BoolProperty>(
+        "Centerline", true, "Whether to display the centerline.", prop_prediction_.get(), SLOT(update()), this);
+    prop_prediction_corridor_ = std::make_unique<rviz::BoolProperty>(
+        "Corridor", false, "Whether to display the corridor.", prop_prediction_.get(), SLOT(update()), this);
+    prop_prediction_point_cloud_point_size_ = std::make_unique<rviz::FloatProperty>(
+        "Point Size", 0.5, "Point size", prop_prediction_.get(), SLOT(update()), this);
+    prop_prediction_billboard_width_ = std::make_unique<rviz::FloatProperty>(
+        "Line Width", 0.05, "Line width", prop_prediction_.get(), SLOT(update()), this);
+    prop_prediction_color_ = std::make_unique<rviz::ColorProperty>(
+        "Color", QColor(0, 0, 0), "Prediction coloring.", prop_prediction_.get(), SLOT(update()), this);
+    prop_prediction_horizon_ =
+        std::make_unique<rviz::FloatProperty>("Time Horizon",
+                                              3.0,
+                                              "Prediction Horizon to display in sec (<= 0 enables all)",
+                                              prop_prediction_.get(),
+                                              SLOT(update()),
+                                              this);
+    prop_prediction_number_traj_ =
+        std::make_unique<rviz::IntProperty>("Number of Trajectories",
+                                            2,
+                                            "Maximum number of predicted trajectories to display",
+                                            prop_prediction_.get(),
+                                            SLOT(update()),
+                                            this);
 }
 
 void ObjectStateArrayDisplay::updateDropdown() {
-    switch (prop_dropdown_visu_->getOptionInt()) {
-    case 1: ///< primitives
-        params_visual_.make_mesh = false;
-        params_visual_.make_primitive = true;
-        break;
+    params_visual_.visualization_mode =
+        static_cast<ObjectStateVisual::Parameters::VisualizationMode>(prop_dropdown_visu_->getOptionInt());
 
-    case 2: ///< mesh
-        params_visual_.make_mesh = true;
-        params_visual_.make_primitive = false;
-        break;
-
-    default:
-        params_visual_.make_mesh = true;
-        params_visual_.make_primitive = false;
-    }
+    prop_point_cloud_->setHidden(prop_dropdown_visu_->getOptionInt() != 2);
 }
 
 void ObjectStateArrayDisplay::updateColoring() {
@@ -154,9 +180,24 @@ void ObjectStateArrayDisplay::updateParameters() {
     params_visual_.text_font_size = prop_text_size_->getFloat();
     params_visual_.text_v_min = params_visual_.arrow_v_min;
 
+    params_visual_.point_cloud_point_size = prop_point_cloud_point_size_->getFloat();
+
+    params_visual_prediction_.prediction_enabled = prop_prediction_->getBool();
+    params_visual_prediction_.size = prop_prediction_point_cloud_point_size_->getFloat();
+    params_visual_prediction_.width = prop_prediction_billboard_width_->getFloat();
+    params_visual_prediction_.color = prop_prediction_color_->getOgreColor();
+    params_visual_prediction_.time_horizon = static_cast<double>(prop_prediction_horizon_->getFloat());
+
+    params_visual_prediction_.centerline = prop_prediction_centerline_->getBool();
+    params_visual_prediction_.corridor = prop_prediction_corridor_->getBool();
+    if (!params_visual_prediction_.centerline && !params_visual_prediction_.corridor) {
+        params_visual_prediction_.prediction_enabled = false;
+    }
+
+    params_visual_prediction_.max_num_trajectories = prop_prediction_number_traj_->getInt();
+
     updateDropdown();
 }
-
 
 Ogre::ColourValue ObjectStateArrayDisplay::colorFromClassification(
     const automated_driving_msgs::ObjectClassification& classification) {
@@ -189,48 +230,138 @@ Ogre::ColourValue ObjectStateArrayDisplay::colorFromClassification(
 }
 
 void ObjectStateArrayDisplay::processMessage(const Msg::ConstPtr& msg) {
+    try {
+        msg_last_ = msg;
+        bool transforms_ok{true};
+        bool prediction_ok{true};
+        std::pair<size_t, size_t> status_hulls{std::make_pair(0, 0)};
 
-    msg_last_ = msg;
-    bool transforms_ok = true;
+        updateParameters();
+        visuals_.clear();
+        visuals_prediction_.clear();
 
-    updateParameters();
-    visuals_.clear();
-
-    if (msg == nullptr || messages_received_ == 0) {
-        setStatusStd(rviz::StatusProperty::Warn, "Topic", "No message received");
-        return;
-    }
-
-    if ((msg->header.stamp - ros::Time::now()).toSec() > 1.0) {
-        setStatusStd(rviz::StatusProperty::Warn, "Topic", "Message delay > 1 second");
-    }
-
-    visuals_.reserve(msg->objects.size());
-    for (const auto& obj : msg->objects) {
-        params_visual_.color = colorFromClassification(obj.classification);
-        /**
-         * Get transform
-         */
-        Ogre::Quaternion orientation;
-        Ogre::Vector3 position;
-        if (!context_->getFrameManager()->transform(
-                obj.motion_state.header, obj.motion_state.pose.pose, position, orientation)) {
-            setStatusStd(rviz::StatusProperty::Error,
-                         "Frame",
-                         "No transformation found for frame '" + obj.motion_state.header.frame_id + "'");
-            transforms_ok = false;
+        if (msg == nullptr || messages_received_ == 0) {
+            setStatusStd(rviz::StatusProperty::Level::Warn, "Topic", "No message received");
+            return;
         }
-        if (position.isNaN() || orientation.isNaN()) {
-            setStatusStd(rviz::StatusProperty::Error, "Frame", "Motion state contains NANs");
-            transforms_ok = false;
-            continue;
-        }
-        visuals_.emplace_back(
-            context_->getSceneManager(), scene_node_->createChildSceneNode(position, orientation), obj, params_visual_);
-    }
 
-    if (transforms_ok)
-        setStatusStd(rviz::StatusProperty::Ok, "Frame", "'" + msg->header.frame_id + "'");
+        if ((msg->header.stamp - ros::Time::now()).toSec() > 1.0) {
+            setStatusStd(rviz::StatusProperty::Level::Warn, "Topic", "Message delay > 1 second");
+        }
+
+        visuals_.reserve(msg->objects.size());
+        visuals_prediction_.reserve(msg->objects.size());
+        for (const auto& obj : msg->objects) {
+            params_visual_.color = colorFromClassification(obj.classification);
+            /**
+             * Get transform for state
+             */
+            Ogre::Quaternion orientation;
+            Ogre::Vector3 position;
+            if (!context_->getFrameManager()->transform(
+                    obj.motion_state.header, obj.motion_state.pose.pose, position, orientation)) {
+                setStatusStd(rviz::StatusProperty::Level::Error,
+                             "Frame",
+                             "No transformation found for frame '" + obj.motion_state.header.frame_id + "'");
+                transforms_ok = false;
+            }
+            if (position.isNaN() || orientation.isNaN()) {
+                setStatusStd(rviz::StatusProperty::Level::Error, "Frame", "Motion state contains NANs");
+                transforms_ok = false;
+                continue;
+            }
+
+            if (obj.hull.triangles.empty()) {
+                status_hulls.first++;
+            }
+            if (obj.hull.vertices.empty()) {
+                status_hulls.second++;
+                continue;
+            }
+            visuals_.emplace_back(context_->getSceneManager(),
+                                  scene_node_->createChildSceneNode(position, orientation),
+                                  obj,
+                                  params_visual_);
+
+            /**
+             * Get transform for prediction
+             */
+            if (obj.motion_prediction.header.frame_id == "" or obj.motion_prediction.trajectories.empty()) {
+                setStatusStd(params_visual_prediction_.prediction_enabled ? rviz::StatusProperty::Level::Error
+                                                                          : rviz::StatusProperty::Level::Warn,
+                             "Prediction",
+                             "No prediction found");
+                prediction_ok = false;
+                continue;
+            }
+            if (params_visual_prediction_.prediction_enabled) {
+                if (!context_->getFrameManager()->transform(
+                        obj.motion_prediction.header, geometry_msgs::Pose(), position, orientation)) {
+                    setStatusStd(rviz::StatusProperty::Level::Error,
+                                 "Frame",
+                                 "No transformation found for frame '" + obj.motion_prediction.header.frame_id + "'");
+                    transforms_ok = false;
+                }
+                if (position.isNaN() || orientation.isNaN()) {
+                    setStatusStd(rviz::StatusProperty::Level::Error, "Frame", "Motion prediction contains NANs");
+                    transforms_ok = false;
+                    continue;
+                }
+                visuals_prediction_.emplace_back(context_->getSceneManager(),
+                                                 scene_node_->createChildSceneNode(position, orientation),
+                                                 obj,
+                                                 params_visual_prediction_);
+            }
+        }
+
+        if (transforms_ok) {
+            setStatusStd(rviz::StatusProperty::Level::Ok, "Frame", "'" + msg->header.frame_id + "'");
+        }
+
+        if (prediction_ok) {
+            setStatusStd(rviz::StatusProperty::Level::Ok, "Prediction", "ok");
+        }
+
+        if (status_hulls.first) {
+            setStatusStd(rviz::StatusProperty::Level::Warn,
+                         "Hull Meshes",
+                         "No hull meshes available for " + std::to_string(status_hulls.first) +
+                             " objects. Mesh visualization will not be available for these objects.");
+        } else {
+            setStatusStd(rviz::StatusProperty::Level::Ok, "Hull Meshes", "ok");
+        }
+
+        if (status_hulls.second) {
+            setStatusStd(rviz::StatusProperty::Level::Warn,
+                         "Hull Points",
+                         "No hull points available for " + std::to_string(status_hulls.second) + " objects.");
+        } else {
+            setStatusStd(rviz::StatusProperty::Level::Ok, "Hull Points", "ok");
+        }
+
+        rviz::StatusProperty::Level visuals_level{rviz::StatusProperty::Level::Ok};
+        std::string visuals_message;
+        std::for_each(std::begin(visuals_), std::end(visuals_), [&](const auto& visual) {
+            const auto& status{visual.getStatus()};
+            if (status.level != rviz::StatusProperty::Level::Ok) {
+                visuals_level = rviz::StatusProperty::Level::Warn;
+                visuals_message += status.message;
+            }
+        });
+
+        std::for_each(std::begin(visuals_prediction_), std::end(visuals_prediction_), [&](const auto& visual) {
+            const auto& status{visual.getStatus()};
+            if (status.level != rviz::StatusProperty::Level::Ok) {
+                visuals_level = rviz::StatusProperty::Level::Warn;
+                visuals_message += status.message;
+            }
+        });
+
+        setStatusStd(visuals_level, "Visuals", visuals_message);
+    } catch (std::exception& e) {
+        ROS_ERROR_STREAM(e.what());
+        ROS_ERROR_STREAM("Failed!");
+    }
 }
 
 } // namespace object_state_array_rviz_plugin_ros

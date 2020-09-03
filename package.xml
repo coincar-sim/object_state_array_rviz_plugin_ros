@@ -19,6 +19,7 @@
   <build_depend>qtbase5-dev</build_depend>
 
   <depend>automated_driving_msgs</depend>
+  <depend>boost</depend>
   <depend>util_automated_driving_msgs</depend>
   <depend>util_rviz</depend>
   <depend>rviz</depend>
