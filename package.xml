@@ -1,10 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
 <package format="2">
   <name>object_state_array_rviz_plugin_ros</name>
   <version>1.0.0</version>
   <description>ObjectStateArray plugin for RViz.</description>
 
   <license>BSD</license>
-  <maintainer email="maximilian.naumann@kit.edu">Maximilian Naumann</maintainer>
+  <maintainer email="eduardo.molinos@kit.edu">Eduardo Molinos</maintainer>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>mrt_cmake_modules</build_depend>
@@ -24,6 +25,6 @@
   <depend>rviz</depend>
 
   <export>
-      <rviz plugin="${prefix}/plugin_description.xml"/>
+      <rviz plugin="${prefix}/plugin_description.xml" />
   </export>
 </package>
